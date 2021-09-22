@@ -1,17 +1,14 @@
-#library(fillmap2)
 library(rgdal)
-#library(INLA)
 library(viridis)
 
-data=read.csv("data/data2.csv")
-fe=read.csv("data/fe.csv")[,-1]
-#replace NA with 0...assume informative NA's
+data=read.csv("data/data_shiny.csv")
+fe=read.csv("data/fixed_estimates.csv")[,-1]
 data[is.na(data)]=0
 
 NCtracts=readOGR("C:\\Users\\mta6203\\Desktop\\551\\Case Study 4\\tl_2016_37_tract\\tl_2016_37_tract.shp")
-NHtracts=NCtracts[which(NCtracts$COUNTYFP==129),]#45 tracts in New Hanover
-NHtracts=NHtracts[order(NHtracts$TRACTCE),]#reorder shp by smallest to largest tract code (same as data)
-NHtracts=NHtracts[-45,]#remove the ocean tract
+NHtracts=NCtracts[which(NCtracts$COUNTYFP==129),]
+NHtracts=NHtracts[order(NHtracts$TRACTCE),]
+NHtracts=NHtracts[-45,]
 
 #plot arrest data
 shinyServer(function(input,output){
@@ -82,17 +79,17 @@ shinyServer(function(input,output){
             } else 
               if (input$adj=="As a Percent of the Population"){
                 if (input$data=="Total Arrests"){
-                  MapData=(data$arrests_total[seq(input$year-2009,dim(data)[1],9)]+.1)/(data$ct_pop[seq(input$year-2009,dim(data)[1],9)]+.1)*100
-                  MapDataScl=(data$arrests_total+.1)/(data$ct_pop+.1)*100
+                  MapData=(data$arrests_total[seq(input$year-2009,dim(data)[1],9)])/(data$ct_pop[seq(input$year-2009,dim(data)[1],9)]+.1)*100
+                  MapDataScl=(data$arrests_total)/(data$ct_pop+.1)*100
                   Caption=paste(input$year,input$data)
                 } else 
                   if (input$data=="White Only Arrests"){
-                    MapData=(data$arrests_W[seq(input$year-2009,dim(data)[1],9)]+.1)/(data$ct_white[seq(input$year-2009,dim(data)[1],9)]+.1)*100
-                    MapDataScl=(data$arrests_W+.1)/(data$ct_white+.1)*100
+                    MapData=(data$arrests_W[seq(input$year-2009,dim(data)[1],9)])/(data$ct_white[seq(input$year-2009,dim(data)[1],9)]+.1)*100
+                    MapDataScl=(data$arrests_W)/(data$ct_white+.1)*100
                     Caption=paste(input$year,input$data)
                   } else {
-                    MapData=(data$arrests_B[seq(input$year-2009,dim(data)[1],9)]+.1)/(data$ct_black[seq(input$year-2009,dim(data)[1],9)]+.1)*100
-                    MapDataScl=(data$arrests_B+.1)/(data$ct_black+.1)*100
+                    MapData=(data$arrests_B[seq(input$year-2009,dim(data)[1],9)])/(data$ct_black[seq(input$year-2009,dim(data)[1],9)]+.1)*100
+                    MapDataScl=(data$arrests_B)/(data$ct_black+.1)*100
                     Caption=paste(input$year,input$data)
                   }      
               } else {
@@ -112,9 +109,9 @@ shinyServer(function(input,output){
                   }      
               }
     
-    fillmap2(NHtracts,Caption,MapData,map.lty = 0,leg.loc = "beside",y.scl = MapDataScl,leg.rnd = 2)
+    fillmap2(NHtracts,Caption,MapData,map.lty = 0,leg.loc = "below",y.scl = MapDataScl,leg.rnd = 2)
   })
-  
+  #table
   output$table <- renderTable({
     if (input$adj=="Poisson Regression"){
       if (input$data=="Total Arrests"){
